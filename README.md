@@ -20,4 +20,5 @@ Cloning Instruction
 -------------------
 In android studio go to VCS -> Checkout from version control -> GitHub and then select this repo from the drop down list.
 
+This project is licensed under the terms of the MIT license.
 
