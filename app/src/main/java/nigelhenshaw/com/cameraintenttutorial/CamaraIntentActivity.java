@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -80,7 +82,7 @@ public class CamaraIntentActivity extends Activity {
             // mPhotoCapturedImageView.setImageBitmap(photoCapturedBitmap);
             // Bitmap photoCapturedBitmap = BitmapFactory.decodeFile(mImageFileLocation);
             // mPhotoCapturedImageView.setImageBitmap(photoCapturedBitmap);
-            setReducedImageSize();
+            rotateImage(setReducedImageSize());
 
         }
     }
@@ -98,7 +100,7 @@ public class CamaraIntentActivity extends Activity {
 
     }
 
-    void setReducedImageSize() {
+    private Bitmap setReducedImageSize() {
         int targetImageViewWidth = mPhotoCapturedImageView.getWidth();
         int targetImageViewHeight = mPhotoCapturedImageView.getHeight();
 
@@ -112,9 +114,33 @@ public class CamaraIntentActivity extends Activity {
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inJustDecodeBounds = false;
 
-        Bitmap photoReducedSizeBitmp = BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
-        mPhotoCapturedImageView.setImageBitmap(photoReducedSizeBitmp);
+        // Bitmap photoReducedSizeBitmp = BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
+        // mPhotoCapturedImageView.setImageBitmap(photoReducedSizeBitmp);
+        return BitmapFactory.decodeFile(mImageFileLocation, bmOptions);
 
 
+
+    }
+
+    private void rotateImage(Bitmap bitmap) {
+        ExifInterface exifInterface = null;
+        try {
+            exifInterface = new ExifInterface(mImageFileLocation);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+        Matrix matrix = new Matrix();
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                matrix.setRotate(90);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix.setRotate(180);
+                break;
+            default:
+        }
+        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        mPhotoCapturedImageView.setImageBitmap(rotatedBitmap);
     }
 }
