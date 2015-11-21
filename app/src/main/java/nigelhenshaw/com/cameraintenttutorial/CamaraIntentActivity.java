@@ -1,7 +1,9 @@
 package nigelhenshaw.com.cameraintenttutorial;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -10,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +28,7 @@ import java.util.Date;
 public class CamaraIntentActivity extends Activity {
 
     private static final int ACTIVITY_START_CAMERA_APP = 0;
+    private static final int REQUEST_EXTERNAL_STORAGE_RESULT = 1;
     private ImageView mPhotoCapturedImageView;
     private String mImageFileLocation = "";
 
@@ -59,12 +63,42 @@ public class CamaraIntentActivity extends Activity {
     }
 
     public void takePhoto(View view) {
+        if(ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            callCameraApp();
+        } else {
+            if(shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                Toast.makeText(this,
+                        "External storage permission required to save images",
+                        Toast.LENGTH_SHORT).show();
+            }
+            requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_EXTERNAL_STORAGE_RESULT);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(requestCode == REQUEST_EXTERNAL_STORAGE_RESULT) {
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                callCameraApp();
+            } else {
+                Toast.makeText(this,
+                        "External write permission has not been granted, cannot saved images",
+                        Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    private void callCameraApp() {
         Intent callCameraApplicationIntent = new Intent();
         callCameraApplicationIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
 
         File photoFile = null;
         try {
-           photoFile = createImageFile();
+            photoFile = createImageFile();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,6 +106,7 @@ public class CamaraIntentActivity extends Activity {
         callCameraApplicationIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
 
         startActivityForResult(callCameraApplicationIntent, ACTIVITY_START_CAMERA_APP);
+
     }
 
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
