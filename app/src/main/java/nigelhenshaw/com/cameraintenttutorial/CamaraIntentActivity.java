@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -63,17 +64,21 @@ public class CamaraIntentActivity extends Activity {
     }
 
     public void takePhoto(View view) {
-        if(ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            callCameraApp();
-        } else {
-            if(shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                Toast.makeText(this,
-                        "External storage permission required to save images",
-                        Toast.LENGTH_SHORT).show();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                callCameraApp();
+            } else {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    Toast.makeText(this,
+                            "External storage permission required to save images",
+                            Toast.LENGTH_SHORT).show();
+                }
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        REQUEST_EXTERNAL_STORAGE_RESULT);
             }
-            requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_EXTERNAL_STORAGE_RESULT);
+        } else {
+            callCameraApp();
         }
     }
 
