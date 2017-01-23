@@ -1,4 +1,4 @@
-package nigelhenshaw.com.cameraintenttutorial;
+package com.mobapptuts.cameraintenttutorial;
 
 import android.Manifest;
 import android.app.Activity;
