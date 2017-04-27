@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -103,8 +104,10 @@ public class CamaraIntentActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        callCameraApplicationIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
-
+        String authorities = getApplicationContext().getPackageName() + ".fileprovider";
+        Uri imageUri = FileProvider.getUriForFile(this, authorities, photoFile);
+        callCameraApplicationIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+//        callCameraApplicationIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
         startActivityForResult(callCameraApplicationIntent, ACTIVITY_START_CAMERA_APP);
 
     }
